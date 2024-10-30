@@ -1,1 +1,1 @@
-# Session2
+# Session2 : Scripting and automation
