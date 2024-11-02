@@ -49,14 +49,14 @@ jobs:
         run: |
           # So sánh nội dung của session2.zip hiện tại và trước đó
           if diff -qr session2_unzip_previous session2_unzip_current >/dev/null; then
-            echo "zip_changed='false'" >> $GITHUB_ENV
+            echo "zip_changed=0" >> $GITHUB_ENV
           else
-            echo "zip_changed='true'" >> $GITHUB_ENV
+            echo "zip_changed=1" >> $GITHUB_ENV
           fi
       
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
-        if: env.zip_changed == 'true'
+        if: env.zip_changed == '1'
         run: |
           # run script session2.sh if content session2.zip change
           bash session2.sh
