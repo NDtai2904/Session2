@@ -53,7 +53,10 @@ jobs:
           else
             echo "zip_changed=1" >> $GITHUB_ENV
           fi
-      
+          
+      - name: install pdftotext 
+        run: sudo apt-get install -y poppler-utils
+        
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
         if: env.zip_changed == '1'
