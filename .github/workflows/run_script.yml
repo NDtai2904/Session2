@@ -56,7 +56,12 @@ jobs:
           
       - name: install pdftotext 
         run: sudo apt-get install -y poppler-utils
-        
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "nguyenduytai2904.learn@gmail.com"
+          git config --global user.name "Duy Tai - Devop"
+      
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
         if: env.zip_changed == '1'
