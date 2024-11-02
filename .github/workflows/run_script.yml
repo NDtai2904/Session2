@@ -28,7 +28,10 @@ jobs:
         run: |
           mkdir -p session2_unzip_current
           mkdir -p session2_unzip_previous
-
+          
+      - name: install pdftotext 
+        run: sudo apt-get install -y poppler-utils
+        
       # giải nén file zip trên commit hiện tại khu push script lên
       - name: unzip current file .zip
         run: |
@@ -60,8 +63,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts    
           
-      - name: install pdftotext 
-        run: sudo apt-get install -y poppler-utils
+      
 
       - name: Configure Git
         run: |
