@@ -73,3 +73,5 @@ jobs:
           git add .
           git commit -m "Updated results after session2.zip changes"
           git push -u origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
