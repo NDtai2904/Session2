@@ -23,18 +23,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
+      # tạo hai thư mục phục vụ cho việc so sánh và tránh xung đột sau khi giải nén
       - name: set up to compare 2 files .zip
         run: |
           mkdir -p session2_unzip_current
           mkdir -p session2_unzip_previous
 
-      # file session2.zip on commit current
+      # giải nén file zip trên commit hiện tại khu push script lên
       - name: unzip current file .zip
         run: |
           unzip -q session2.zip -d session2_unzip_current
 
-      # session2.zip on GitHub repo    
+      # kiểm tra và giải nén sesssion2.zip nếu tồn tại   
       - name: Unzip previous session2.zip for comparison
         run: |
           # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
@@ -42,7 +42,8 @@ jobs:
             unzip -q session2_previous.zip -d session2_unzip_previous
           fi
      
-      
+
+      # so sánh và lưu kết quả vào biến mối trường của github
       - name: Compare content inside session2.zip
         id: check_zip_content
         run: |
@@ -53,7 +54,7 @@ jobs:
             echo "zip_changed='true'" >> $GITHUB_ENV
           fi
       
-      
+      # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
         if: env.zip_changed == 'true'
         run: |
