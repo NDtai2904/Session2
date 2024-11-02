@@ -1,0 +1,66 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Run script session2.sh when session2.zip change
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  check-and-run:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: set up to compare 2 files .zip
+        run: |
+          mkdir -p session2_unzip_current
+          mkdir -p session2_unzip_previous
+
+      # file session2.zip on commit current
+      - name: unzip current file .zip
+        run: |
+          unzip -q session2.zip -d session2_unzip_current
+
+      # session2.zip on GitHub repo    
+      - name: Unzip previous session2.zip for comparison
+        run: |
+          # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
+          if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
+            unzip -q session2_previous.zip -d session2_unzip_previous
+          fi
+     
+      
+      - name: Compare content inside session2.zip
+        id: check_zip_content
+        run: |
+          # So sánh nội dung của session2.zip hiện tại và trước đó
+          if diff -qr session2_unzip_previous session2_unzip_current >/dev/null; then
+            echo "zip_changed='false'" >> $GITHUB_ENV
+          else
+            echo "zip_changed='true'" >> $GITHUB_ENV
+          fi
+      
+      
+      - name: Run session2.sh if session2.zip content changed
+        if: env.zip_changed == 'true'
+        run: |
+          # run script session2.sh if content session2.zip change
+          bash session2.sh
+          
+          # push the result to GitHub after updating session2.zip 
+          git add .
+          git commit -m "Updated results after session2.zip changes"
+          git push -u origin main
