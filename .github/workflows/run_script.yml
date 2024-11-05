@@ -38,7 +38,7 @@ jobs:
           # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
           if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
             echo "hash_previous=$(md5sum <(unzip -p session2_previous.zip) | awk '{print $1}')" >> $GITHUB_ENV
-            rm -rf  session2_previous.zip
+            rm -f session2_previous.zip
           fi
      
        
