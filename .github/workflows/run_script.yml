@@ -44,7 +44,7 @@ jobs:
        
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
-        if: env.hash_current != env.hash_previous 
+        if: ${{env.hash_current != env.hash_previous}} 
         run: |
           # run script session2.sh if content session2.zip change
           bash session2.sh
