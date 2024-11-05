@@ -50,7 +50,7 @@ jobs:
           bash session2.sh
           
           # push the result to GitHub after updating session2.zip 
-          git add session2
+          git add .
           git commit -m "Updated results after session2.zip changes"
           git push -u origin main
         
