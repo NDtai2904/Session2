@@ -22,7 +22,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-        
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "nguyenduytai2904.learn@gmail.com"
+          git config --global user.name "Duy Tai - Devop"
+      
       - name: hash current file .zip
         run: |
           echo "hash_current=$(md5sum <(unzip -p session2.zip) | awk '{print $1}')" >> $GITHUB_ENV
