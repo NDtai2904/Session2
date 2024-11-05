@@ -1,0 +1,89 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Run script session2.sh when session2.zip change
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  check-and-run:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # tạo hai thư mục phục vụ cho việc so sánh và tránh xung đột sau khi giải nén
+      - name: set up to compare 2 files .zip
+        run: |
+          mkdir -p session2_unzip_current
+          mkdir -p session2_unzip_previous
+          
+      - name: install pdftotext 
+        run: sudo apt-get install -y poppler-utils
+        
+      # giải nén file zip trên commit hiện tại khu push script lên
+      - name: unzip current file .zip
+        run: |
+          unzip -q session2.zip -d session2_unzip_current
+
+      # kiểm tra và giải nén sesssion2.zip nếu tồn tại   
+      - name: Unzip previous session2.zip for comparison
+        run: |
+          # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
+          if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
+            unzip -q session2_previous.zip -d session2_unzip_previous
+          fi
+     
+
+      # so sánh và lưu kết quả vào biến mối trường của github
+      - name: Compare content inside session2.zip
+        id: check_zip_content
+        run: |
+          # So sánh nội dung của session2.zip hiện tại và trước đó
+          if diff -qr session2_unzip_previous session2_unzip_current >/dev/null; then
+            echo "zip_changed=0" >> $GITHUB_ENV
+          else
+            echo "zip_changed=1" >> $GITHUB_ENV
+          fi
+      - name: Clean up temporary files
+        run: |
+          rm -rf session2_unzip_current session2_unzip_previous session2_previous.zip
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts    
+          
+      
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "nguyenduytai2904.learn@gmail.com"
+          git config --global user.name "Duy Tai - Devop"
+      
+      # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
+      - name: Run session2.sh if session2.zip content changed
+        if: env.zip_changed == '1'
+        run: |
+          # run script session2.sh if content session2.zip change
+          bash session2.sh
+          
+          # push the result to GitHub after updating session2.zip 
+          git add .
+          git commit -m "Updated results after session2.zip changes"
+          git push -u origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
