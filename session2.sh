@@ -2,6 +2,7 @@
 
 # giải nén thư mục zip
 unzip session2.zip 
+sudo apt-get install -y poppler-utils
 # chuyển path và tên file sang agrument
 # lấy path do người dùng truyền vào default session2
 # tìm hiểu những flag của set để xử lí tín hiệu
