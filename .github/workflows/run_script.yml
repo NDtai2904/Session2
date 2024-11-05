@@ -38,13 +38,15 @@ jobs:
           # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
           if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
             echo "hash_previous=$(md5sum <(unzip -p session2_previous.zip) | awk '{print $1}')" >> $GITHUB_ENV
+          else
+            echo "hash_previous=" >> $GITHUB_ENV
           fi
           rm -f session2_previous.zip
      
        
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
-        if: ${{env.hash_current != env.hash_previous}} 
+        if: ${{ env.hash_current != env.hash_previous }} 
         run: |
           # run script session2.sh if content session2.zip change
           bash session2.sh
@@ -52,5 +54,5 @@ jobs:
           # push the result to GitHub after updating session2.zip 
           git add .
           git commit -m "Updated results after session2.zip changes"
-          git push -u origin main
+          git push origin main
         
