@@ -22,61 +22,24 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      # tạo hai thư mục phục vụ cho việc so sánh và tránh xung đột sau khi giải nén
-      - name: set up to compare 2 files .zip
-        run: |
-          mkdir -p session2_unzip_current
-          mkdir -p session2_unzip_previous
-          
-      - name: install pdftotext 
-        run: sudo apt-get install -y poppler-utils
         
-      # giải nén file zip trên commit hiện tại khu push script lên
-      - name: unzip current file .zip
+      - name: hash current file .zip
         run: |
-          unzip -q session2.zip -d session2_unzip_current
+          run: echo "hash_current=$(md5sum <(unzip -p session2.zip) | awk '{print $1}')" >> $GITHUB_ENV
 
       # kiểm tra và giải nén sesssion2.zip nếu tồn tại   
-      - name: Unzip previous session2.zip for comparison
+      - name: hash previous file zip
         run: |
           # Kiểm tra và giải nén phiên bản trước của session2.zip (nếu tồn tại)
           if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
-            unzip -q session2_previous.zip -d session2_unzip_previous
+            echo "hash_previous=$(md5sum <(unzip -p session2_previous.zip) | awk '{print $1}')" >> $GITHUB_ENV
+            rm -rf  session2_previous.zip
           fi
      
-
-      # so sánh và lưu kết quả vào biến mối trường của github
-      - name: Compare content inside session2.zip
-        id: check_zip_content
-        run: |
-          # So sánh nội dung của session2.zip hiện tại và trước đó
-          if diff -qr session2_unzip_previous session2_unzip_current >/dev/null; then
-            echo "zip_changed=0" >> $GITHUB_ENV
-          else
-            echo "zip_changed=1" >> $GITHUB_ENV
-          fi
-      - name: Clean up temporary files
-        run: |
-          rm -rf session2_unzip_current session2_unzip_previous session2_previous.zip
-
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts    
-          
-      
-
-      - name: Configure Git
-        run: |
-          git config --global user.email "nguyenduytai2904.learn@gmail.com"
-          git config --global user.name "Duy Tai - Devop"
-      
+       
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
-        if: env.zip_changed == '1'
+        if: env.hash_current != env.hash_previous 
         run: |
           # run script session2.sh if content session2.zip change
           bash session2.sh
@@ -85,5 +48,4 @@ jobs:
           git add .
           git commit -m "Updated results after session2.zip changes"
           git push -u origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
