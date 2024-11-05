@@ -39,14 +39,14 @@ jobs:
           if git show HEAD^:session2.zip > session2_previous.zip 2>/dev/null; then
             echo "hash_previous=$(md5sum <(unzip -p session2_previous.zip) | awk '{print $1}')" >> $GITHUB_ENV
           else
-            echo "hash_previous=" >> $GITHUB_ENV
+            echo "hash_previous=none" >> $GITHUB_ENV
           fi
           rm -f session2_previous.zip
      
        
       # kiểm tra kết quả nếu đúng thì chạy lại script và push kết quả lên github
       - name: Run session2.sh if session2.zip content changed
-        if: ${{ env.hash_current != env.hash_previous }} 
+        if: ${{ env.hash_current != env.hash_previous && env.hash_previous != 'none' }} 
         run: |
           # run script session2.sh if content session2.zip change
           bash session2.sh
