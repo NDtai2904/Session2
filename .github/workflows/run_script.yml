@@ -25,7 +25,7 @@ jobs:
         
       - name: hash current file .zip
         run: |
-          run: echo "hash_current=$(md5sum <(unzip -p session2.zip) | awk '{print $1}')" >> $GITHUB_ENV
+          echo "hash_current=$(md5sum <(unzip -p session2.zip) | awk '{print $1}')" >> $GITHUB_ENV
 
       # kiểm tra và giải nén sesssion2.zip nếu tồn tại   
       - name: hash previous file zip
